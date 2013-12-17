@@ -32,6 +32,7 @@
         NSError *error;
         
         self.captureSession = [[AVCaptureSession alloc] init];
+        self.captureSession.sessionPreset = AVCaptureSessionPresetInputPriority;
         
         AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
         AVCaptureDeviceInput *videoIn = [AVCaptureDeviceInput deviceInputWithDevice:videoDevice error:&error];
@@ -104,64 +105,29 @@
     }
     
     AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    AVCaptureDeviceFormat *selectedFormat = nil;
+    AVFrameRateRange *frameRateRange = nil;
 
-    // search for a Full Range video + n fps combo
-    for (AVCaptureDeviceFormat *format in videoDevice.formats)
-    {
-        // media type
-        NSString *compoundStr = [NSString stringWithFormat:@"'%@'", format.mediaType];
+    for (AVCaptureDeviceFormat *aFormat in [videoDevice formats]) {
         
-        // media sub type
-        CMFormatDescriptionRef myCMFormatDescriptionRef= format.formatDescription;
-        FourCharCode mediaSubType = CMFormatDescriptionGetMediaSubType(myCMFormatDescriptionRef);
-        BOOL fullRange = NO;
-        if (mediaSubType==kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) {
-            compoundStr = [compoundStr stringByAppendingString:@"/'420v'"];
-        }
-        else if (mediaSubType==kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) {
-            compoundStr = [compoundStr stringByAppendingString:@"/'420f'"];
-            fullRange = YES;
-        }
-        else {
-            [compoundStr stringByAppendingString:@"'UNKNOWN'"];
-        }
-        
-        // width, height
-        CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(myCMFormatDescriptionRef);
-        NSString *whStr = [NSString stringWithFormat:@" %ix %i", dimensions.width, dimensions.height];
-        compoundStr = [compoundStr stringByAppendingString:whStr];
-        
-        // max framerate
-        float maxFramerate = ((AVFrameRateRange*)[format.videoSupportedFrameRateRanges objectAtIndex:0]).maxFrameRate;
-        NSString *maxFRStr = [NSString stringWithFormat:@", { %.0f- %.0f fps}",
-                              ((AVFrameRateRange*)[format.videoSupportedFrameRateRanges objectAtIndex:0]).minFrameRate,
-                              maxFramerate];
-        compoundStr = [compoundStr stringByAppendingString:maxFRStr];
-        
-        // others
-        NSString *vfofStr = [NSString stringWithFormat:@", fov: %.3f", format.videoFieldOfView];
-        compoundStr = [compoundStr stringByAppendingString:vfofStr];
-        
-        compoundStr = [compoundStr stringByAppendingString:
-                       (format.videoBinned ? @", binned" : @"")];
-        
-        compoundStr = [compoundStr stringByAppendingString:
-                       (format.videoStabilizationSupported ? @", supports vis" : @"")];
-        
-        NSString *vmzfStr = [NSString stringWithFormat:@", max zoom: %.2f", format.videoMaxZoomFactor];
-        compoundStr = [compoundStr stringByAppendingString:vmzfStr];
-        
-        NSString *vzfutStr = [NSString stringWithFormat:@" (upscales @%.2f)", format.videoZoomFactorUpscaleThreshold];
-        compoundStr = [compoundStr stringByAppendingString:vzfutStr];
-        
-        // set to activeFormat
-        if (fullRange && maxFramerate >= desiredFPS) {
+        for (AVFrameRateRange *range in aFormat.videoSupportedFrameRateRanges) {
             
-            NSLog(@"Found %.0f fps mode: %@", desiredFPS, compoundStr);
+            if (range.maxFrameRate >= desiredFPS) {
+                
+                selectedFormat = aFormat;
+                frameRateRange = range;
+            }
+        }
+    }
+    
+    if (selectedFormat) {
+        
+        if ([videoDevice lockForConfiguration:nil]) {
             
-            [videoDevice lockForConfiguration:nil];
-            videoDevice.activeFormat = format;
-            videoDevice.activeVideoMaxFrameDuration = CMTimeMake(1, (int32_t)desiredFPS);
+            NSLog(@"selected format:%@", selectedFormat);
+            videoDevice.activeFormat = selectedFormat;
+            videoDevice.activeVideoMinFrameDuration = frameRateRange.minFrameDuration;
+            videoDevice.activeVideoMaxFrameDuration = frameRateRange.maxFrameDuration;
             [videoDevice unlockForConfiguration];
         }
     }
