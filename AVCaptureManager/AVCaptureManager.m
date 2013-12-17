@@ -113,22 +113,26 @@
 {
     BOOL isRunning = self.captureSession.isRunning;
     
-    if (isRunning) {
-        [self.captureSession stopRunning];
-    }
+    if (isRunning)  [self.captureSession stopRunning];
     
     AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
     AVCaptureDeviceFormat *selectedFormat = nil;
+    int32_t maxWidth = 0;
     AVFrameRateRange *frameRateRange = nil;
 
-    for (AVCaptureDeviceFormat *aFormat in [videoDevice formats]) {
+    for (AVCaptureDeviceFormat *format in [videoDevice formats]) {
         
-        for (AVFrameRateRange *range in aFormat.videoSupportedFrameRateRanges) {
+        for (AVFrameRateRange *range in format.videoSupportedFrameRateRanges) {
             
-            if (range.maxFrameRate >= desiredFPS) {
+            CMFormatDescriptionRef desc = format.formatDescription;
+            CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(desc);
+            int32_t width = dimensions.width;
+
+            if (range.maxFrameRate == desiredFPS && width >= maxWidth) {
                 
-                selectedFormat = aFormat;
+                selectedFormat = format;
                 frameRateRange = range;
+                maxWidth = width;
             }
         }
     }
@@ -139,15 +143,13 @@
             
             NSLog(@"selected format:%@", selectedFormat);
             videoDevice.activeFormat = selectedFormat;
-            videoDevice.activeVideoMinFrameDuration = frameRateRange.minFrameDuration;
-            videoDevice.activeVideoMaxFrameDuration = frameRateRange.maxFrameDuration;
+            videoDevice.activeVideoMinFrameDuration = CMTimeMake(1, (int32_t)desiredFPS);
+            videoDevice.activeVideoMaxFrameDuration = CMTimeMake(1, (int32_t)desiredFPS);
             [videoDevice unlockForConfiguration];
         }
     }
     
-    if (isRunning) {
-        [self.captureSession startRunning];
-    }
+    if (isRunning) [self.captureSession startRunning];
 }
 
 - (void)startRecording {
