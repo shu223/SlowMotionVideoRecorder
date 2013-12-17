@@ -23,6 +23,7 @@
 		8A8745C2185FD6BD0074C919 /* SlowMotionVideoRecorderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A8745C1185FD6BD0074C919 /* SlowMotionVideoRecorderTests.m */; };
 		8A8745D1185FDBF20074C919 /* SVProgressHUD.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8A8745CE185FDBF20074C919 /* SVProgressHUD.bundle */; };
 		8A8745D2185FDBF20074C919 /* SVProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A8745D0185FDBF20074C919 /* SVProgressHUD.m */; };
+		8AFE3BF8185FF10A007A2CC1 /* AVCaptureManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AFE3BF7185FF10A007A2CC1 /* AVCaptureManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,8 @@
 		8A8745CE185FDBF20074C919 /* SVProgressHUD.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SVProgressHUD.bundle; sourceTree = "<group>"; };
 		8A8745CF185FDBF20074C919 /* SVProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SVProgressHUD.h; sourceTree = "<group>"; };
 		8A8745D0185FDBF20074C919 /* SVProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SVProgressHUD.m; sourceTree = "<group>"; };
+		8AFE3BF6185FF10A007A2CC1 /* AVCaptureManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AVCaptureManager.h; sourceTree = "<group>"; };
+		8AFE3BF7185FF10A007A2CC1 /* AVCaptureManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AVCaptureManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +91,7 @@
 		8A87458A185FD6BD0074C919 = {
 			isa = PBXGroup;
 			children = (
+				8AFE3BF5185FF10A007A2CC1 /* AVCaptureHelper */,
 				8A8745CB185FDBF20074C919 /* vendor */,
 				8A87459C185FD6BD0074C919 /* SlowMotionVideoRecorder */,
 				8A8745BB185FD6BD0074C919 /* SlowMotionVideoRecorderTests */,
@@ -176,6 +180,15 @@
 				8A8745D0185FDBF20074C919 /* SVProgressHUD.m */,
 			);
 			path = SVProgressHUD;
+			sourceTree = "<group>";
+		};
+		8AFE3BF5185FF10A007A2CC1 /* AVCaptureHelper */ = {
+			isa = PBXGroup;
+			children = (
+				8AFE3BF6185FF10A007A2CC1 /* AVCaptureManager.h */,
+				8AFE3BF7185FF10A007A2CC1 /* AVCaptureManager.m */,
+			);
+			path = AVCaptureHelper;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -280,6 +293,7 @@
 				8A8745D2185FDBF20074C919 /* SVProgressHUD.m in Sources */,
 				8A8745A7185FD6BD0074C919 /* AppDelegate.m in Sources */,
 				8A8745A3185FD6BD0074C919 /* main.m in Sources */,
+				8AFE3BF8185FF10A007A2CC1 /* AVCaptureManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -488,6 +502,7 @@
 				8A8745C7185FD6BD0074C919 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8A8745C8185FD6BD0074C919 /* Build configuration list for PBXNativeTarget "SlowMotionVideoRecorderTests" */ = {
 			isa = XCConfigurationList;
@@ -496,6 +511,7 @@
 				8A8745CA185FD6BD0074C919 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
