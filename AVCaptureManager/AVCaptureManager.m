@@ -66,6 +66,7 @@
         self.previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.captureSession];
         self.previewLayer.frame = previewView.bounds;
         self.previewLayer.contentsGravity = kCAGravityResizeAspectFill;
+        self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
         [previewView.layer insertSublayer:self.previewLayer atIndex:0];
         
         [self.captureSession startRunning];
@@ -80,15 +81,13 @@
 
 - (void)toggleContentsGravity {
     
-    if ([self.previewLayer.contentsGravity isEqualToString:kCAGravityResizeAspectFill]) {
+    if ([self.previewLayer.videoGravity isEqualToString:AVLayerVideoGravityResizeAspectFill]) {
     
-        self.previewLayer.contentsGravity = kCAGravityResizeAspect;
+        self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspect;
     }
     else {
-        self.previewLayer.contentsGravity = kCAGravityResizeAspectFill;
+        self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     }
-    
-    NSLog(@"gravity:%@", self.previewLayer.contentsGravity);
 }
 
 - (void)resetFormat {
