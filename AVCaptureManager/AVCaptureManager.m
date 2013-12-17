@@ -18,6 +18,7 @@
 @property (nonatomic, strong) AVCaptureSession *captureSession;
 @property (nonatomic, strong) AVCaptureMovieFileOutput *fileOutput;
 @property (nonatomic, strong) AVCaptureDeviceFormat *defaultFormat;
+@property (nonatomic, strong) AVCaptureVideoPreviewLayer *previewLayer;
 @end
 
 
@@ -62,10 +63,10 @@
         [self.captureSession addOutput:self.fileOutput];
         
         
-        AVCaptureVideoPreviewLayer *previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.captureSession];
-        previewLayer.frame = previewView.bounds;
-        previewLayer.contentsGravity = kCAGravityResizeAspectFill;
-        [previewView.layer insertSublayer:previewLayer atIndex:0];
+        self.previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.captureSession];
+        self.previewLayer.frame = previewView.bounds;
+        self.previewLayer.contentsGravity = kCAGravityResizeAspectFill;
+        [previewView.layer insertSublayer:self.previewLayer atIndex:0];
         
         [self.captureSession startRunning];
     }
@@ -76,6 +77,19 @@
 
 // =============================================================================
 #pragma mark - Public
+
+- (void)toggleContentsGravity {
+    
+    if ([self.previewLayer.contentsGravity isEqualToString:kCAGravityResizeAspectFill]) {
+    
+        self.previewLayer.contentsGravity = kCAGravityResizeAspect;
+    }
+    else {
+        self.previewLayer.contentsGravity = kCAGravityResizeAspectFill;
+    }
+    
+    NSLog(@"gravity:%@", self.previewLayer.contentsGravity);
+}
 
 - (void)resetFormat {
 

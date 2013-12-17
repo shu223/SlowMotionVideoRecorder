@@ -21,6 +21,7 @@
 @property (nonatomic, readonly) BOOL isRecording;
 
 - (id)initWithPreviewView:(UIView *)previewView;
+- (void)toggleContentsGravity;
 - (void)resetFormat;
 - (void)switchFormatWithDesiredFPS:(CGFloat)desiredFPS;
 - (void)startRecording;

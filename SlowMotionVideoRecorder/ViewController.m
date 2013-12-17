@@ -40,11 +40,25 @@
     
     self.captureManager = [[AVCaptureManager alloc] initWithPreviewView:self.view];
     self.captureManager.delegate = self;
+    
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                 action:@selector(handleDoubleTap:)];
+    tapGesture.numberOfTapsRequired = 2;
+    [self.view addGestureRecognizer:tapGesture];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
+}
+
+
+// =============================================================================
+#pragma mark - Gesture Handler
+
+- (void)handleDoubleTap:(UITapGestureRecognizer *)sender {
+
+    [self.captureManager toggleContentsGravity];
 }
 
 
