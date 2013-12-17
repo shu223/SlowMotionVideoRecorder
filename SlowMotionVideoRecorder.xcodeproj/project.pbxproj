@@ -21,6 +21,8 @@
 		8A8745B8185FD6BD0074C919 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A87459A185FD6BD0074C919 /* UIKit.framework */; };
 		8A8745C0185FD6BD0074C919 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8A8745BE185FD6BD0074C919 /* InfoPlist.strings */; };
 		8A8745C2185FD6BD0074C919 /* SlowMotionVideoRecorderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A8745C1185FD6BD0074C919 /* SlowMotionVideoRecorderTests.m */; };
+		8A8745D1185FDBF20074C919 /* SVProgressHUD.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8A8745CE185FDBF20074C919 /* SVProgressHUD.bundle */; };
+		8A8745D2185FDBF20074C919 /* SVProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A8745D0185FDBF20074C919 /* SVProgressHUD.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +55,10 @@
 		8A8745BD185FD6BD0074C919 /* SlowMotionVideoRecorderTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "SlowMotionVideoRecorderTests-Info.plist"; sourceTree = "<group>"; };
 		8A8745BF185FD6BD0074C919 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		8A8745C1185FD6BD0074C919 /* SlowMotionVideoRecorderTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SlowMotionVideoRecorderTests.m; sourceTree = "<group>"; };
+		8A8745CD185FDBF20074C919 /* SVProgressHUD-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SVProgressHUD-Prefix.pch"; sourceTree = "<group>"; };
+		8A8745CE185FDBF20074C919 /* SVProgressHUD.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SVProgressHUD.bundle; sourceTree = "<group>"; };
+		8A8745CF185FDBF20074C919 /* SVProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SVProgressHUD.h; sourceTree = "<group>"; };
+		8A8745D0185FDBF20074C919 /* SVProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SVProgressHUD.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +88,7 @@
 		8A87458A185FD6BD0074C919 = {
 			isa = PBXGroup;
 			children = (
+				8A8745CB185FDBF20074C919 /* vendor */,
 				8A87459C185FD6BD0074C919 /* SlowMotionVideoRecorder */,
 				8A8745BB185FD6BD0074C919 /* SlowMotionVideoRecorderTests */,
 				8A874595185FD6BD0074C919 /* Frameworks */,
@@ -150,6 +157,25 @@
 				8A8745BE185FD6BD0074C919 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		8A8745CB185FDBF20074C919 /* vendor */ = {
+			isa = PBXGroup;
+			children = (
+				8A8745CC185FDBF20074C919 /* SVProgressHUD */,
+			);
+			path = vendor;
+			sourceTree = "<group>";
+		};
+		8A8745CC185FDBF20074C919 /* SVProgressHUD */ = {
+			isa = PBXGroup;
+			children = (
+				8A8745CD185FDBF20074C919 /* SVProgressHUD-Prefix.pch */,
+				8A8745CE185FDBF20074C919 /* SVProgressHUD.bundle */,
+				8A8745CF185FDBF20074C919 /* SVProgressHUD.h */,
+				8A8745D0185FDBF20074C919 /* SVProgressHUD.m */,
+			);
+			path = SVProgressHUD;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -231,6 +257,7 @@
 				8A8745AF185FD6BD0074C919 /* Images.xcassets in Resources */,
 				8A8745A1185FD6BD0074C919 /* InfoPlist.strings in Resources */,
 				8A8745AA185FD6BD0074C919 /* Main.storyboard in Resources */,
+				8A8745D1185FDBF20074C919 /* SVProgressHUD.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -250,6 +277,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8A8745AD185FD6BD0074C919 /* ViewController.m in Sources */,
+				8A8745D2185FDBF20074C919 /* SVProgressHUD.m in Sources */,
 				8A8745A7185FD6BD0074C919 /* AppDelegate.m in Sources */,
 				8A8745A3185FD6BD0074C919 /* main.m in Sources */,
 			);
