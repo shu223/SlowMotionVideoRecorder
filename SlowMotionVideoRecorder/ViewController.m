@@ -135,7 +135,8 @@
     
     NSTimeInterval current = [[NSDate date] timeIntervalSince1970];
     NSTimeInterval recorded = current - startTime;
-    self.statusLabel.text = [NSString stringWithFormat:@"Recording: %.2f sec", recorded];
+    
+    self.statusLabel.text = [NSString stringWithFormat:@"%.2f", recorded];
 }
 
 
