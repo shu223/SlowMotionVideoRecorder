@@ -3,7 +3,7 @@ Slow Motion Video Recorder for iOS
 
 An iOS sample app for **recording 120 fps slow-motion videos** using AVFoundation. Including a wrapper class which makes the implementation much easier. Available on the **iPhone5s**. 
 
-<img src="http://f.cl.ly/items/2S0R102A1k1v0k3z0P2R/IMG_8862_r1_c1_.jpg" width="250">
+![](http://f.cl.ly/items/360a271y1G3Q2C2a3p2d/IMG_8907_r1_c1.jpg)
 
 
 ##Usage of the wrapper class
@@ -30,7 +30,9 @@ self.captureManager.delegate = self;
 ````
 
 
-##An example for the slow motion video
+##Example for the slow motion video
 
-<iframe src="http://player.vimeo.com/video/82064431" width="250" height="450" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe> <p><a href="http://vimeo.com/82064431">120fps Slow-Motion video recorded using AVFoundation.</a></p>
+![](http://f.cl.ly/items/1b3Q0h0k3k2m261s3R3n/samplemovie__.gif)
+
+<p><a href="http://vimeo.com/82064431">See the 120fps Slo-Mo video in Vimeo 120fps.</a></p>
 

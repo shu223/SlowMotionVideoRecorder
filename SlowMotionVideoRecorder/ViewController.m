@@ -20,11 +20,15 @@
 }
 @property (nonatomic, strong) AVCaptureManager *captureManager;
 @property (nonatomic, assign) NSTimer *timer;
+@property (nonatomic, strong) UIImage *recStartImage;
+@property (nonatomic, strong) UIImage *recStopImage;
+@property (nonatomic, strong) UIImage *outerImage1;
+@property (nonatomic, strong) UIImage *outerImage2;
 
 @property (nonatomic, weak) IBOutlet UILabel *statusLabel;
 @property (nonatomic, weak) IBOutlet UISegmentedControl *fpsControl;
-@property (nonatomic, weak) IBOutlet UIButton *retakeBtn;
-@property (nonatomic, weak) IBOutlet UIButton *stopBtn;
+@property (nonatomic, weak) IBOutlet UIButton *recBtn;
+@property (nonatomic, weak) IBOutlet UIImageView *outerImageView;
 @end
 
 
@@ -34,10 +38,6 @@
 {
     [super viewDidLoad];
     
-    self.retakeBtn.hidden = YES;
-    self.stopBtn.hidden = YES;
-    self.fpsControl.hidden = NO;
-    
     self.captureManager = [[AVCaptureManager alloc] initWithPreviewView:self.view];
     self.captureManager.delegate = self;
     
@@ -45,6 +45,25 @@
                                                                                  action:@selector(handleDoubleTap:)];
     tapGesture.numberOfTapsRequired = 2;
     [self.view addGestureRecognizer:tapGesture];
+    
+    
+    // Setup images for the Shutter Button
+    UIImage *image;
+    image = [UIImage imageNamed:@"ShutterButtonStart"];
+    self.recStartImage = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    [self.recBtn setImage:self.recStartImage
+                 forState:UIControlStateNormal];
+    
+    image = [UIImage imageNamed:@"ShutterButtonStop"];
+    self.recStopImage = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+
+    [self.recBtn setTintColor:[UIColor colorWithRed:245./255.
+                                              green:51./255.
+                                               blue:51./255.
+                                              alpha:1.0]];
+    self.outerImage1 = [UIImage imageNamed:@"outer1"];
+    self.outerImage2 = [UIImage imageNamed:@"outer2"];
+    self.outerImageView.image = self.outerImage1;
 }
 
 - (void)didReceiveMemoryWarning
@@ -142,49 +161,52 @@
 // =============================================================================
 #pragma mark - IBAction
 
-- (IBAction)startButtonTapped:(id)sender {
+- (IBAction)recButtonTapped:(id)sender {
     
+    // REC START
     if (!self.captureManager.isRecording) {
+
+        // change UI
+        [self.recBtn setImage:self.recStopImage
+                     forState:UIControlStateNormal];
+        self.fpsControl.enabled = NO;
         
-        self.stopBtn.hidden = NO;
-        self.retakeBtn.hidden = NO;
-        self.fpsControl.hidden = YES;
-        
+        // timer start
+        startTime = [[NSDate date] timeIntervalSince1970];
+        self.timer = [NSTimer scheduledTimerWithTimeInterval:0.01
+                                                      target:self
+                                                    selector:@selector(timerHandler:)
+                                                    userInfo:nil
+                                                     repeats:YES];
+
         [self.captureManager startRecording];
     }
-    
-    // 時間経過取得用
-    startTime = [[NSDate date] timeIntervalSince1970];
-    self.timer = [NSTimer scheduledTimerWithTimeInterval:0.01
-                                                  target:self
-                                                selector:@selector(timerHandler:)
-                                                userInfo:nil
-                                                 repeats:YES];
+    // REC STOP
+    else {
+
+        isNeededToSave = YES;
+        [self.captureManager stopRecording];
+        
+        [self.timer invalidate];
+        self.timer = nil;
+        
+        // change UI
+        [self.recBtn setImage:self.recStartImage
+                     forState:UIControlStateNormal];
+        self.fpsControl.enabled = YES;
+    }
 }
 
-- (IBAction)stopButtonTapped:(id)sender {
-    
-    isNeededToSave = YES;
-    [self.captureManager stopRecording];
-    
-    [self.timer invalidate];
-    self.timer = nil;
-    
-    self.stopBtn.hidden = YES;
-    self.retakeBtn.hidden = YES;
-    self.fpsControl.hidden = NO;
-}
-
-- (IBAction)retakeButtonTapped:(id)sender {
-    
-    isNeededToSave = NO;
-    [self.captureManager stopRecording];
-
-    [self.timer invalidate];
-    self.timer = nil;
-    
-    self.statusLabel.text = nil;
-}
+//- (IBAction)retakeButtonTapped:(id)sender {
+//    
+//    isNeededToSave = NO;
+//    [self.captureManager stopRecording];
+//
+//    [self.timer invalidate];
+//    self.timer = nil;
+//    
+//    self.statusLabel.text = nil;
+//}
 
 - (IBAction)fpsChanged:(UISegmentedControl *)sender {
     
@@ -220,7 +242,13 @@
         }
         
         dispatch_async(dispatch_get_main_queue(), ^{
-            
+
+            if (desiredFps > 30.0) {
+                self.outerImageView.image = self.outerImage2;
+            }
+            else {
+                self.outerImageView.image = self.outerImage1;
+            }
             [SVProgressHUD dismiss];
         });
     });
