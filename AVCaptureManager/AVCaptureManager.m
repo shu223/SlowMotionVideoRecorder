@@ -128,7 +128,7 @@
             CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(desc);
             int32_t width = dimensions.width;
 
-            if (range.maxFrameRate == desiredFPS && width >= maxWidth) {
+            if (range.minFrameRate <= desiredFPS && desiredFPS <= range.maxFrameRate && width >= maxWidth) {
                 
                 selectedFormat = format;
                 frameRateRange = range;
