@@ -1,6 +1,7 @@
 //
 //  AVCaptureManager.h
 //  SlowMotionVideoRecorder
+//  https://github.com/shu223/SlowMotionVideoRecorder
 //
 //  Created by shuichi on 12/17/13.
 //  Copyright (c) 2013 Shuichi Tsutsumi. All rights reserved.
