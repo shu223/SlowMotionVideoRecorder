@@ -106,7 +106,7 @@ static const CGFloat SVProgressHUDRingThickness = 6;
 
 
 + (void)setStatus:(NSString *)string {
-	[[self sharedView] setStatus:string];
+    [[self sharedView] setStatus:string];
 }
 
 #pragma mark - Show Methods
@@ -183,15 +183,15 @@ static const CGFloat SVProgressHUDRingThickness = 6;
 #pragma mark - Instance Methods
 
 - (id)initWithFrame:(CGRect)frame {
-	
+    
     if ((self = [super initWithFrame:frame])) {
-		self.userInteractionEnabled = NO;
+        self.userInteractionEnabled = NO;
         self.backgroundColor = [UIColor clearColor];
-		self.alpha = 0;
+        self.alpha = 0;
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
         self.activityCount = 0;
     }
-	
+    
     return self;
 }
 
@@ -229,7 +229,7 @@ static const CGFloat SVProgressHUDRingThickness = 6;
 }
 
 - (void)updatePosition {
-	
+    
     CGFloat hudWidth = 100;
     CGFloat hudHeight = 100;
     CGFloat stringHeightBuffer = 20;
@@ -273,25 +273,25 @@ static const CGFloat SVProgressHUDRingThickness = 6;
             labelRect = CGRectMake(0, labelRectY, hudWidth, stringHeight);
         }
     }
-	
-	self.hudView.bounds = CGRectMake(0, 0, hudWidth, hudHeight);
+    
+    self.hudView.bounds = CGRectMake(0, 0, hudWidth, hudHeight);
 
     if(string)
         self.imageView.center = CGPointMake(CGRectGetWidth(self.hudView.bounds)/2, 36);
-	else
-       	self.imageView.center = CGPointMake(CGRectGetWidth(self.hudView.bounds)/2, CGRectGetHeight(self.hudView.bounds)/2);
-	
-	self.stringLabel.hidden = NO;
-	self.stringLabel.frame = labelRect;
-	
-	if(string) {
-		self.spinnerView.center = CGPointMake(ceil(CGRectGetWidth(self.hudView.bounds)/2)+0.5, 40.5);
+    else
+           self.imageView.center = CGPointMake(CGRectGetWidth(self.hudView.bounds)/2, CGRectGetHeight(self.hudView.bounds)/2);
+    
+    self.stringLabel.hidden = NO;
+    self.stringLabel.frame = labelRect;
+    
+    if(string) {
+        self.spinnerView.center = CGPointMake(ceil(CGRectGetWidth(self.hudView.bounds)/2)+0.5, 40.5);
         
         if(self.progress != -1)
             self.backgroundRingLayer.position = self.ringLayer.position = CGPointMake((CGRectGetWidth(self.hudView.bounds)/2), 36);
-	}
+    }
     else {
-		self.spinnerView.center = CGPointMake(ceil(CGRectGetWidth(self.hudView.bounds)/2)+0.5, ceil(self.hudView.bounds.size.height/2)+0.5);
+        self.spinnerView.center = CGPointMake(ceil(CGRectGetWidth(self.hudView.bounds)/2)+0.5, ceil(self.hudView.bounds.size.height/2)+0.5);
         
         if(self.progress != -1)
             self.backgroundRingLayer.position = self.ringLayer.position = CGPointMake((CGRectGetWidth(self.hudView.bounds)/2), CGRectGetHeight(self.hudView.bounds)/2);
@@ -301,7 +301,7 @@ static const CGFloat SVProgressHUDRingThickness = 6;
 
 - (void)setStatus:(NSString *)string {
     
-	self.stringLabel.text = string;
+    self.stringLabel.text = string;
     [self updatePosition];
     
 }
@@ -737,7 +737,7 @@ static const CGFloat SVProgressHUDRingThickness = 6;
 #if __IPHONE_OS_VERSION_MIN_REQUIRED >= 50000
         
         // UIAppearance is used when iOS >= 5.0
-		hudView.backgroundColor = self.hudBackgroundColor;
+        hudView.backgroundColor = self.hudBackgroundColor;
 #endif
 #endif
 
@@ -773,23 +773,23 @@ static const CGFloat SVProgressHUDRingThickness = 6;
 - (UILabel *)stringLabel {
     if (stringLabel == nil) {
         stringLabel = [[UILabel alloc] initWithFrame:CGRectZero];
-		stringLabel.backgroundColor = [UIColor clearColor];
-		stringLabel.adjustsFontSizeToFitWidth = YES;
+        stringLabel.backgroundColor = [UIColor clearColor];
+        stringLabel.adjustsFontSizeToFitWidth = YES;
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
         stringLabel.textAlignment = UITextAlignmentCenter;
 #else
         stringLabel.textAlignment = NSTextAlignmentCenter;
 #endif
         
-		stringLabel.baselineAdjustment = UIBaselineAdjustmentAlignCenters;
+        stringLabel.baselineAdjustment = UIBaselineAdjustmentAlignCenters;
 
         // UIAppearance is used when iOS >= 5.0
-		stringLabel.textColor = self.hudForegroundColor;
-		stringLabel.font = self.hudFont;
+        stringLabel.textColor = self.hudForegroundColor;
+        stringLabel.font = self.hudFont;
         
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < 70000
-		stringLabel.shadowColor = self.hudStatusShadowColor;
-		stringLabel.shadowOffset = CGSizeMake(0, -1);
+        stringLabel.shadowColor = self.hudStatusShadowColor;
+        stringLabel.shadowOffset = CGSizeMake(0, -1);
 #endif
         stringLabel.numberOfLines = 0;
     }
@@ -813,8 +813,8 @@ static const CGFloat SVProgressHUDRingThickness = 6;
 - (UIActivityIndicatorView *)spinnerView {
     if (spinnerView == nil) {
         spinnerView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-		spinnerView.hidesWhenStopped = YES;
-		spinnerView.bounds = CGRectMake(0, 0, 37, 37);
+        spinnerView.hidesWhenStopped = YES;
+        spinnerView.bounds = CGRectMake(0, 0, 37, 37);
         
         if([spinnerView respondsToSelector:@selector(setColor:)]) // setColor is iOS 5+
             spinnerView.color = self.hudForegroundColor;

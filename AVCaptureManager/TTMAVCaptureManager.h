@@ -10,18 +10,24 @@
 #import <Foundation/Foundation.h>
 
 
-@protocol AVCaptureManagerDelegate <NSObject>
+typedef enum {
+    TTMOutputModeVideoData,
+    TTMOutputModeMovieFile,
+} TTMOutputMode;
+
+
+@protocol TTMAVCaptureManagerDelegate <NSObject>
 - (void)didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
                                       error:(NSError *)error;
 @end
 
 
-@interface AVCaptureManager : NSObject
+@interface TTMAVCaptureManager : NSObject
 
-@property (nonatomic, assign) id<AVCaptureManagerDelegate> delegate;
+@property (nonatomic, assign) id<TTMAVCaptureManagerDelegate> delegate;
 @property (nonatomic, readonly) BOOL isRecording;
 
-- (id)initWithPreviewView:(UIView *)previewView;
+- (id)initWithPreviewView:(UIView *)previewView mode:(TTMOutputMode)mode;
 - (void)toggleContentsGravity;
 - (void)resetFormat;
 - (void)switchFormatWithDesiredFPS:(CGFloat)desiredFPS;

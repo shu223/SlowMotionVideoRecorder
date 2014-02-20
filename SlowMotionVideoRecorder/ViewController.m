@@ -8,17 +8,17 @@
 
 #import "ViewController.h"
 #import "SVProgressHUD.h"
-#import "AVCaptureManager.h"
+#import "TTMAVCaptureManager.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 
 
 @interface ViewController ()
-<AVCaptureManagerDelegate>
+<TTMAVCaptureManagerDelegate>
 {
     NSTimeInterval startTime;
     BOOL isNeededToSave;
 }
-@property (nonatomic, strong) AVCaptureManager *captureManager;
+@property (nonatomic, strong) TTMAVCaptureManager *captureManager;
 @property (nonatomic, assign) NSTimer *timer;
 @property (nonatomic, strong) UIImage *recStartImage;
 @property (nonatomic, strong) UIImage *recStopImage;
@@ -38,7 +38,10 @@
 {
     [super viewDidLoad];
     
-    self.captureManager = [[AVCaptureManager alloc] initWithPreviewView:self.view];
+    // > for debug
+//    self.captureManager = [[AVCaptureManager alloc] initWithPreviewView:self.view mode:TTMOutputModeMovieFile];
+    self.captureManager = [[TTMAVCaptureManager alloc] initWithPreviewView:self.view mode:TTMOutputModeVideoData];
+    // < for debug
     self.captureManager.delegate = self;
     
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self
@@ -145,6 +148,8 @@
 #pragma mark - AVCaptureManagerDeleagte
 
 - (void)didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL error:(NSError *)error {
+    
+    LOG_CURRENT_METHOD;
     
     if (error) {
         NSLog(@"error:%@", error);
