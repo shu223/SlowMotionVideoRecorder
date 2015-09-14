@@ -20,7 +20,7 @@ self.captureManager.delegate = self;
 ###2. Start recording
 
 ````
-[self.captureManager stopRecording];
+[self.captureManager startRecording];
 ````
 
 ###3. Stop recording
