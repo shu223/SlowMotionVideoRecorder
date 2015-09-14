@@ -29,6 +29,7 @@
 @property (nonatomic, weak) IBOutlet UISegmentedControl *fpsControl;
 @property (nonatomic, weak) IBOutlet UIButton *recBtn;
 @property (nonatomic, weak) IBOutlet UIImageView *outerImageView;
+@property (nonatomic, weak) IBOutlet UIView *previewView;
 @end
 
 
@@ -38,10 +39,8 @@
 {
     [super viewDidLoad];
     
-    // > for debug
-//    self.captureManager = [[AVCaptureManager alloc] initWithPreviewView:self.view mode:TTMOutputModeMovieFile];
-    self.captureManager = [[TTMAVCaptureManager alloc] initWithPreviewView:self.view mode:TTMOutputModeVideoData];
-    // < for debug
+//    self.captureManager = [[TTMAVCaptureManager alloc] initWithPreviewView:self.previewView mode:TTMOutputModeMovieFile];
+    self.captureManager = [[TTMAVCaptureManager alloc] initWithPreviewView:self.previewView mode:TTMOutputModeVideoData];
     self.captureManager.delegate = self;
     
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self
@@ -72,6 +71,11 @@
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    
+    [self.captureManager updateOrientationWithPreviewView:self.previewView];
 }
 
 

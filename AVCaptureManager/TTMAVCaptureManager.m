@@ -136,6 +136,192 @@
     return self;
 }
 
++ (CGFloat)angleOffsetFromPortraitOrientationToOrientation:(AVCaptureVideoOrientation)orientation
+{
+	CGFloat angle = 0.0;
+	
+	switch (orientation) {
+		case AVCaptureVideoOrientationPortrait:
+			angle = 0.0;
+			break;
+		case AVCaptureVideoOrientationPortraitUpsideDown:
+			angle = M_PI;
+			break;
+		case AVCaptureVideoOrientationLandscapeRight:
+			angle = -M_PI_2;
+			break;
+		case AVCaptureVideoOrientationLandscapeLeft:
+			angle = M_PI_2;
+			break;
+		default:
+			break;
+	}
+    
+	return angle;
+}
+
+- (CGAffineTransform)transformFromCurrentVideoOrientationToOrientation:(AVCaptureVideoOrientation)orientation
+{
+	CGAffineTransform transform = CGAffineTransformIdentity;
+    
+	// Calculate offsets from an arbitrary reference orientation (portrait)
+	CGFloat orientationAngleOffset = [TTMAVCaptureManager angleOffsetFromPortraitOrientationToOrientation:orientation];
+	CGFloat videoOrientationAngleOffset = [TTMAVCaptureManager angleOffsetFromPortraitOrientationToOrientation:videoOrientation];
+	
+	// Find the difference in angle between the passed in orientation and the current video orientation
+	CGFloat angleOffset = orientationAngleOffset - videoOrientationAngleOffset;
+	transform = CGAffineTransformMakeRotation(angleOffset);
+	
+	return transform;
+}
+
+- (BOOL)setupAssetWriterVideoInput:(CMFormatDescriptionRef)currentFormatDescription
+{
+    float bitsPerPixel;
+    CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(currentFormatDescription);
+    int numPixels = dimensions.width * dimensions.height;
+    int bitsPerSecond;
+    
+    // Assume that lower-than-SD resolutions are intended for streaming, and use a lower bitrate
+    if ( numPixels < (640 * 480) )
+        bitsPerPixel = 4.05; // This bitrate matches the quality produced by AVCaptureSessionPresetMedium or Low.
+    else
+        bitsPerPixel = 11.4; // This bitrate matches the quality produced by AVCaptureSessionPresetHigh.
+    
+    bitsPerSecond = numPixels * bitsPerPixel;
+    
+    NSDictionary *videoCompressionSettings = [NSDictionary dictionaryWithObjectsAndKeys:
+                                              AVVideoCodecH264, AVVideoCodecKey,
+                                              [NSNumber numberWithInteger:dimensions.width], AVVideoWidthKey,
+                                              [NSNumber numberWithInteger:dimensions.height], AVVideoHeightKey,
+                                              [NSDictionary dictionaryWithObjectsAndKeys:
+                                               [NSNumber numberWithInteger:bitsPerSecond], AVVideoAverageBitRateKey,
+                                               [NSNumber numberWithInteger:30], AVVideoMaxKeyFrameIntervalKey,
+                                               nil], AVVideoCompressionPropertiesKey,
+                                              nil];
+    
+    NSLog(@"videoCompressionSetting:%@", videoCompressionSettings);
+    
+    if ([self.assetWriter canApplyOutputSettings:videoCompressionSettings forMediaType:AVMediaTypeVideo]) {
+        
+        self.assetWriterVideoInput = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeVideo
+                                                                    outputSettings:videoCompressionSettings];
+        
+        self.assetWriterVideoInput.expectsMediaDataInRealTime = YES;
+        self.assetWriterVideoInput.transform = [self transformFromCurrentVideoOrientationToOrientation:referenceOrientation];
+        
+        if ([self.assetWriter canAddInput:self.assetWriterVideoInput]) {
+            
+            [self.assetWriter addInput:self.assetWriterVideoInput];
+        }
+        else {
+            
+            NSLog(@"Couldn't add asset writer video input.");
+            return NO;
+        }
+    }
+    else {
+        
+        NSLog(@"Couldn't apply video output settings.");
+        return NO;
+    }
+    
+    return YES;
+}
+
+- (BOOL)setupAssetWriterAudioInput:(CMFormatDescriptionRef)currentFormatDescription
+{
+	const AudioStreamBasicDescription *currentASBD = CMAudioFormatDescriptionGetStreamBasicDescription(currentFormatDescription);
+    
+	size_t aclSize = 0;
+	const AudioChannelLayout *currentChannelLayout = CMAudioFormatDescriptionGetChannelLayout(currentFormatDescription, &aclSize);
+	NSData *currentChannelLayoutData = nil;
+	
+	// AVChannelLayoutKey must be specified, but if we don't know any better give an empty data and let AVAssetWriter decide.
+	if ( currentChannelLayout && aclSize > 0 ) {
+        
+		currentChannelLayoutData = [NSData dataWithBytes:currentChannelLayout length:aclSize];
+    }
+	else {
+        
+		currentChannelLayoutData = [NSData data];
+    }
+    
+	NSDictionary *audioCompressionSettings = [NSDictionary dictionaryWithObjectsAndKeys:
+											  [NSNumber numberWithInteger:kAudioFormatMPEG4AAC], AVFormatIDKey,
+											  [NSNumber numberWithFloat:currentASBD->mSampleRate], AVSampleRateKey,
+											  [NSNumber numberWithInt:64000], AVEncoderBitRatePerChannelKey,
+											  [NSNumber numberWithInteger:currentASBD->mChannelsPerFrame], AVNumberOfChannelsKey,
+											  currentChannelLayoutData, AVChannelLayoutKey,
+											  nil];
+	if ([self.assetWriter canApplyOutputSettings:audioCompressionSettings forMediaType:AVMediaTypeAudio]) {
+        
+		self.assetWriterAudioInput = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeAudio
+                                                                    outputSettings:audioCompressionSettings];
+        
+		self.assetWriterAudioInput.expectsMediaDataInRealTime = YES;
+        
+		if ([self.assetWriter canAddInput:self.assetWriterAudioInput]) {
+            
+			[self.assetWriter addInput:self.assetWriterAudioInput];
+        }
+		else {
+            
+			NSLog(@"Couldn't add asset writer audio input.");
+            return NO;
+		}
+	}
+	else {
+        
+		NSLog(@"Couldn't apply audio output settings.");
+        return NO;
+	}
+    
+    return YES;
+}
+
+- (void)writeSampleBuffer:(CMSampleBufferRef)sampleBuffer
+                   ofType:(NSString *)mediaType
+{
+    if (self.assetWriter.status == AVAssetWriterStatusUnknown) {
+        
+        if ([self.assetWriter startWriting]) {
+            
+            CMTime timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+            [self.assetWriter startSessionAtSourceTime:timestamp];
+        }
+        else {
+            
+            NSLog(@"AVAssetWriter startWriting error:%@", self.assetWriter.error);
+        }
+    }
+    
+    if (self.assetWriter.status == AVAssetWriterStatusWriting) {
+        
+        if (mediaType == AVMediaTypeVideo) {
+            
+            if (self.assetWriterVideoInput.readyForMoreMediaData) {
+                
+                if (![self.assetWriterVideoInput appendSampleBuffer:sampleBuffer]) {
+                    
+                    NSLog(@"isRecording:%d, willBeStarted:%d", self.isRecording, recordingWillBeStarted);
+                    NSLog(@"AVAssetWriterInput video appendSapleBuffer error:%@", self.assetWriter.error);
+                }
+            }
+        }
+        else if (mediaType == AVMediaTypeAudio) {
+            
+            if (self.assetWriterAudioInput.readyForMoreMediaData) {
+                
+                if (![self.assetWriterAudioInput appendSampleBuffer:sampleBuffer]) {
+                    
+                    NSLog(@"AVAssetWriterInput audio appendSapleBuffer error:%@", self.assetWriter.error);
+                }
+            }
+        }
+    }
+}
+
 
 // =============================================================================
 #pragma mark - Public
@@ -299,190 +485,19 @@
     }
 }
 
-+ (CGFloat)angleOffsetFromPortraitOrientationToOrientation:(AVCaptureVideoOrientation)orientation
-{
-	CGFloat angle = 0.0;
-	
-	switch (orientation) {
-		case AVCaptureVideoOrientationPortrait:
-			angle = 0.0;
-			break;
-		case AVCaptureVideoOrientationPortraitUpsideDown:
-			angle = M_PI;
-			break;
-		case AVCaptureVideoOrientationLandscapeRight:
-			angle = -M_PI_2;
-			break;
-		case AVCaptureVideoOrientationLandscapeLeft:
-			angle = M_PI_2;
-			break;
-		default:
-			break;
-	}
-    
-	return angle;
-}
+- (void)updateOrientationWithPreviewView:(UIView *)previewView {
 
-- (CGAffineTransform)transformFromCurrentVideoOrientationToOrientation:(AVCaptureVideoOrientation)orientation
-{
-	CGAffineTransform transform = CGAffineTransformIdentity;
-    
-	// Calculate offsets from an arbitrary reference orientation (portrait)
-	CGFloat orientationAngleOffset = [TTMAVCaptureManager angleOffsetFromPortraitOrientationToOrientation:orientation];
-	CGFloat videoOrientationAngleOffset = [TTMAVCaptureManager angleOffsetFromPortraitOrientationToOrientation:videoOrientation];
-	
-	// Find the difference in angle between the passed in orientation and the current video orientation
-	CGFloat angleOffset = orientationAngleOffset - videoOrientationAngleOffset;
-	transform = CGAffineTransformMakeRotation(angleOffset);
-	
-	return transform;
-}
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    // Don't update the reference orientation when the device orientation is face up/down or unknown.
+    if (UIDeviceOrientationIsPortrait(orientation) || UIDeviceOrientationIsLandscape(orientation)) {
+        referenceOrientation = (AVCaptureVideoOrientation)orientation;
+    }
 
-- (BOOL)setupAssetWriterVideoInput:(CMFormatDescriptionRef)currentFormatDescription
-{
-    float bitsPerPixel;
-    CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions(currentFormatDescription);
-    int numPixels = dimensions.width * dimensions.height;
-    int bitsPerSecond;
-    
-    // Assume that lower-than-SD resolutions are intended for streaming, and use a lower bitrate
-    if ( numPixels < (640 * 480) )
-        bitsPerPixel = 4.05; // This bitrate matches the quality produced by AVCaptureSessionPresetMedium or Low.
-    else
-        bitsPerPixel = 11.4; // This bitrate matches the quality produced by AVCaptureSessionPresetHigh.
-    
-    bitsPerSecond = numPixels * bitsPerPixel;
-    
-    NSDictionary *videoCompressionSettings = [NSDictionary dictionaryWithObjectsAndKeys:
-                                              AVVideoCodecH264, AVVideoCodecKey,
-                                              [NSNumber numberWithInteger:dimensions.width], AVVideoWidthKey,
-                                              [NSNumber numberWithInteger:dimensions.height], AVVideoHeightKey,
-                                              [NSDictionary dictionaryWithObjectsAndKeys:
-                                               [NSNumber numberWithInteger:bitsPerSecond], AVVideoAverageBitRateKey,
-                                               [NSNumber numberWithInteger:30], AVVideoMaxKeyFrameIntervalKey,
-                                               nil], AVVideoCompressionPropertiesKey,
-                                              nil];
-    
-    NSLog(@"videoCompressionSetting:%@", videoCompressionSettings);
-    
-    if ([self.assetWriter canApplyOutputSettings:videoCompressionSettings forMediaType:AVMediaTypeVideo]) {
-        
-        self.assetWriterVideoInput = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeVideo
-                                                                    outputSettings:videoCompressionSettings];
-        
-        self.assetWriterVideoInput.expectsMediaDataInRealTime = YES;
-        self.assetWriterVideoInput.transform = [self transformFromCurrentVideoOrientationToOrientation:referenceOrientation];
-        
-        if ([self.assetWriter canAddInput:self.assetWriterVideoInput]) {
+    self.previewLayer.frame = previewView.bounds;
 
-            [self.assetWriter addInput:self.assetWriterVideoInput];
-        }
-        else {
-            
-            NSLog(@"Couldn't add asset writer video input.");
-            return NO;
-        }
-    }
-    else {
-        
-        NSLog(@"Couldn't apply video output settings.");
-        return NO;
-    }
-    
-    return YES;
-}
+    [[self.previewLayer connection] setVideoOrientation:self.videoConnection.videoOrientation];
 
-- (BOOL)setupAssetWriterAudioInput:(CMFormatDescriptionRef)currentFormatDescription
-{
-	const AudioStreamBasicDescription *currentASBD = CMAudioFormatDescriptionGetStreamBasicDescription(currentFormatDescription);
-    
-	size_t aclSize = 0;
-	const AudioChannelLayout *currentChannelLayout = CMAudioFormatDescriptionGetChannelLayout(currentFormatDescription, &aclSize);
-	NSData *currentChannelLayoutData = nil;
-	
-	// AVChannelLayoutKey must be specified, but if we don't know any better give an empty data and let AVAssetWriter decide.
-	if ( currentChannelLayout && aclSize > 0 ) {
-        
-		currentChannelLayoutData = [NSData dataWithBytes:currentChannelLayout length:aclSize];
-    }
-	else {
-        
-		currentChannelLayoutData = [NSData data];
-    }
-    
-	NSDictionary *audioCompressionSettings = [NSDictionary dictionaryWithObjectsAndKeys:
-											  [NSNumber numberWithInteger:kAudioFormatMPEG4AAC], AVFormatIDKey,
-											  [NSNumber numberWithFloat:currentASBD->mSampleRate], AVSampleRateKey,
-											  [NSNumber numberWithInt:64000], AVEncoderBitRatePerChannelKey,
-											  [NSNumber numberWithInteger:currentASBD->mChannelsPerFrame], AVNumberOfChannelsKey,
-											  currentChannelLayoutData, AVChannelLayoutKey,
-											  nil];
-	if ([self.assetWriter canApplyOutputSettings:audioCompressionSettings forMediaType:AVMediaTypeAudio]) {
-        
-		self.assetWriterAudioInput = [[AVAssetWriterInput alloc] initWithMediaType:AVMediaTypeAudio
-                                                                    outputSettings:audioCompressionSettings];
-        
-		self.assetWriterAudioInput.expectsMediaDataInRealTime = YES;
-        
-		if ([self.assetWriter canAddInput:self.assetWriterAudioInput]) {
-            
-			[self.assetWriter addInput:self.assetWriterAudioInput];
-        }
-		else {
-            
-			NSLog(@"Couldn't add asset writer audio input.");
-            return NO;
-		}
-	}
-	else {
-        
-		NSLog(@"Couldn't apply audio output settings.");
-        return NO;
-	}
-    
-    return YES;
-}
-
-- (void)writeSampleBuffer:(CMSampleBufferRef)sampleBuffer
-                   ofType:(NSString *)mediaType
-{
-    if (self.assetWriter.status == AVAssetWriterStatusUnknown) {
-        
-        if ([self.assetWriter startWriting]) {
-            
-            CMTime timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
-            [self.assetWriter startSessionAtSourceTime:timestamp];
-        }
-        else {
-            
-            NSLog(@"AVAssetWriter startWriting error:%@", self.assetWriter.error);
-        }
-    }
-    
-    if (self.assetWriter.status == AVAssetWriterStatusWriting) {
-        
-        if (mediaType == AVMediaTypeVideo) {
-            
-            if (self.assetWriterVideoInput.readyForMoreMediaData) {
-                
-                if (![self.assetWriterVideoInput appendSampleBuffer:sampleBuffer]) {
-                    
-                    NSLog(@"isRecording:%d, willBeStarted:%d", self.isRecording, recordingWillBeStarted);
-                    NSLog(@"AVAssetWriterInput video appendSapleBuffer error:%@", self.assetWriter.error);
-                }
-            }
-        }
-        else if (mediaType == AVMediaTypeAudio) {
-            
-            if (self.assetWriterAudioInput.readyForMoreMediaData) {
-                
-                if (![self.assetWriterAudioInput appendSampleBuffer:sampleBuffer]) {
-                    
-                    NSLog(@"AVAssetWriterInput audio appendSapleBuffer error:%@", self.assetWriter.error);
-                }
-            }
-        }
-    }
+    readyToRecordVideo = NO;
 }
 
 

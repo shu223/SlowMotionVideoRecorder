@@ -33,5 +33,6 @@ typedef enum {
 - (void)switchFormatWithDesiredFPS:(CGFloat)desiredFPS;
 - (void)startRecording;
 - (void)stopRecording;
+- (void)updateOrientationWithPreviewView:(UIView *)previewView;
 
 @end
