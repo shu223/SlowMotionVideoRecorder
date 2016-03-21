@@ -8,17 +8,17 @@
 
 #import "ViewController.h"
 #import "SVProgressHUD.h"
-#import "TTMAVCaptureManager.h"
+#import "TTMCaptureManager.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 
 
 @interface ViewController ()
-<TTMAVCaptureManagerDelegate>
+<TTMCaptureManagerDelegate>
 {
     NSTimeInterval startTime;
     BOOL isNeededToSave;
 }
-@property (nonatomic, strong) TTMAVCaptureManager *captureManager;
+@property (nonatomic, strong) TTMCaptureManager *captureManager;
 @property (nonatomic, assign) NSTimer *timer;
 @property (nonatomic, strong) UIImage *recStartImage;
 @property (nonatomic, strong) UIImage *recStopImage;
@@ -39,8 +39,9 @@
 {
     [super viewDidLoad];
     
-//    self.captureManager = [[TTMAVCaptureManager alloc] initWithPreviewView:self.previewView mode:TTMOutputModeMovieFile];
-    self.captureManager = [[TTMAVCaptureManager alloc] initWithPreviewView:self.previewView mode:TTMOutputModeVideoData];
+    self.captureManager = [[TTMCaptureManager alloc] initWithPreviewView:self.previewView
+                                                     preferredCameraType:CameraTypeBack
+                                                              outputMode:OutputModeVideoData];
     self.captureManager.delegate = self;
     
     UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self

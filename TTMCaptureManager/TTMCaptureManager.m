@@ -1,5 +1,5 @@
 //
-//  AVCaptureManager.m
+//  TTMCaptureManager.m
 //  SlowMotionVideoRecorder
 //  https://github.com/shu223/SlowMotionVideoRecorder
 //
@@ -7,12 +7,11 @@
 //  Copyright (c) 2013 Shuichi Tsutsumi. All rights reserved.
 //
 
-#import "TTMAVCaptureManager.h"
+#import "TTMCaptureManager.h"
 #import <AVFoundation/AVFoundation.h>
-#import <CoreMedia/CoreMedia.h>
 
 
-@interface TTMAVCaptureManager ()
+@interface TTMCaptureManager ()
 <AVCaptureFileOutputRecordingDelegate, AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate>
 {
     CMTime defaultVideoMaxFrameDuration;
@@ -23,13 +22,14 @@
     dispatch_queue_t movieWritingQueue;
     CMBufferQueueRef previewBufferQueue;
 	BOOL recordingWillBeStarted;
-    TTMOutputMode currentMode;
+    OutputMode currentOutputMode;
 }
 @property (nonatomic, strong) AVCaptureSession *captureSession;
 @property (nonatomic, strong) AVCaptureMovieFileOutput *movieFileOutput;
 @property (nonatomic, strong) AVCaptureDeviceFormat *defaultFormat;
 @property (nonatomic, strong) NSURL *fileURL;
 @property (nonatomic, strong) AVCaptureVideoPreviewLayer *previewLayer;
+@property (nonatomic, strong) AVCaptureDevice *videoDevice;
 
 // for video data output
 @property (nonatomic, strong) AVAssetWriter *assetWriter;
@@ -40,15 +40,17 @@
 @end
 
 
-@implementation TTMAVCaptureManager
+@implementation TTMCaptureManager
 
-- (id)initWithPreviewView:(UIView *)previewView mode:(TTMOutputMode)mode {
-    
+- (instancetype)initWithPreviewView:(UIView *)previewView
+                preferredCameraType:(CameraType)cameraType
+                         outputMode:(OutputMode)outputMode
+{
     self = [super init];
     
     if (self) {
     
-        currentMode = mode;
+        currentOutputMode = outputMode;
         
         referenceOrientation = (AVCaptureVideoOrientation)UIDeviceOrientationPortrait;
 
@@ -57,8 +59,8 @@
         self.captureSession = [[AVCaptureSession alloc] init];
         self.captureSession.sessionPreset = AVCaptureSessionPresetInputPriority;
         
-        AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-        AVCaptureDeviceInput *videoIn = [AVCaptureDeviceInput deviceInputWithDevice:videoDevice error:&error];
+        self.videoDevice = cameraType == CameraTypeFront ? [TTMCaptureManager frontCaptureDevice] : [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+        AVCaptureDeviceInput *videoIn = [AVCaptureDeviceInput deviceInputWithDevice:self.videoDevice error:&error];
         
         if (error) {
             NSLog(@"Video input creation failed");
@@ -73,30 +75,32 @@
         
         
         // save the default format
-        self.defaultFormat = videoDevice.activeFormat;
-        defaultVideoMaxFrameDuration = videoDevice.activeVideoMaxFrameDuration;
+        self.defaultFormat = self.videoDevice.activeFormat;
+        defaultVideoMaxFrameDuration = self.videoDevice.activeVideoMaxFrameDuration;
         
-        NSLog(@"videoDevice.activeFormat:%@", videoDevice.activeFormat);
+        NSLog(@"videoDevice.activeFormat:%@", self.videoDevice.activeFormat);
         
         AVCaptureDevice *audioDevice= [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
         AVCaptureDeviceInput *audioIn = [AVCaptureDeviceInput deviceInputWithDevice:audioDevice error:&error];
         [self.captureSession addInput:audioIn];
         
-        self.previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.captureSession];
-        self.previewLayer.frame = previewView.bounds;
-        self.previewLayer.contentsGravity = kCAGravityResizeAspectFill;
-        self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-        [previewView.layer insertSublayer:self.previewLayer atIndex:0];
+        if (previewView) {
+            self.previewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.captureSession];
+            self.previewLayer.frame = previewView.bounds;
+            self.previewLayer.contentsGravity = kCAGravityResizeAspectFill;
+            self.previewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+            [previewView.layer insertSublayer:self.previewLayer atIndex:0];
+        }
 
-        switch (mode) {
-            case TTMOutputModeMovieFile:
+        switch (outputMode) {
+            case OutputModeMovieFile:
             default:
             {
                 self.movieFileOutput = [[AVCaptureMovieFileOutput alloc] init];
                 [self.captureSession addOutput:self.movieFileOutput];
                 break;
             }
-            case TTMOutputModeVideoData:
+            case OutputModeVideoData:
             {
                 // Video
                 AVCaptureVideoDataOutput *videoDataOutput = [[AVCaptureVideoDataOutput alloc] init];
@@ -136,6 +140,20 @@
     return self;
 }
 
++ (AVCaptureDevice *)frontCaptureDevice {
+    
+    NSArray *videoDevices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+    for (AVCaptureDevice *device in videoDevices)
+    {
+        if (device.position == AVCaptureDevicePositionFront)
+        {
+            return device;
+        }
+    }
+
+    return [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+}
+
 + (CGFloat)angleOffsetFromPortraitOrientationToOrientation:(AVCaptureVideoOrientation)orientation
 {
 	CGFloat angle = 0.0;
@@ -165,8 +183,8 @@
 	CGAffineTransform transform = CGAffineTransformIdentity;
     
 	// Calculate offsets from an arbitrary reference orientation (portrait)
-	CGFloat orientationAngleOffset = [TTMAVCaptureManager angleOffsetFromPortraitOrientationToOrientation:orientation];
-	CGFloat videoOrientationAngleOffset = [TTMAVCaptureManager angleOffsetFromPortraitOrientationToOrientation:videoOrientation];
+	CGFloat orientationAngleOffset = [TTMCaptureManager angleOffsetFromPortraitOrientationToOrientation:orientation];
+	CGFloat videoOrientationAngleOffset = [TTMCaptureManager angleOffsetFromPortraitOrientationToOrientation:videoOrientation];
 	
 	// Find the difference in angle between the passed in orientation and the current video orientation
 	CGFloat angleOffset = orientationAngleOffset - videoOrientationAngleOffset;
@@ -408,7 +426,7 @@
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectory = [paths objectAtIndex:0];
     
-    if (currentMode == TTMOutputModeMovieFile) {
+    if (currentOutputMode == OutputModeMovieFile) {
         
         int fileNamePostfix = 0;
         NSString *filePath = nil;
@@ -421,7 +439,7 @@
 
         [self.movieFileOutput startRecordingToOutputFileURL:self.fileURL recordingDelegate:self];
     }
-    else if (currentMode == TTMOutputModeVideoData) {
+    else if (currentOutputMode == OutputModeVideoData) {
 
         dispatch_async(movieWritingQueue, ^{
 
@@ -456,11 +474,11 @@
 
 - (void)stopRecording {
 
-    if (currentMode == TTMOutputModeMovieFile) {
+    if (currentOutputMode == OutputModeMovieFile) {
         
         [self.movieFileOutput stopRecording];
     }
-    else if (currentMode == TTMOutputModeVideoData) {
+    else if (currentOutputMode == OutputModeVideoData) {
         
         dispatch_async(movieWritingQueue, ^{
 
@@ -532,6 +550,10 @@
     didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
            fromConnection:(AVCaptureConnection *)connection
 {
+    if (self.onBuffer) {
+        self.onBuffer(sampleBuffer);
+    }
+    
     CMFormatDescriptionRef formatDescription = CMSampleBufferGetFormatDescription(sampleBuffer);
 
     CFRetain(sampleBuffer);

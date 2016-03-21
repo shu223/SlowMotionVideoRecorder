@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8A4448441CA0AEC700DEDAFA /* TTMCaptureManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A4448431CA0AEC700DEDAFA /* TTMCaptureManager.m */; };
 		8A874597185FD6BD0074C919 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A874596185FD6BD0074C919 /* Foundation.framework */; };
 		8A874599185FD6BD0074C919 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A874598185FD6BD0074C919 /* CoreGraphics.framework */; };
 		8A87459B185FD6BD0074C919 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A87459A185FD6BD0074C919 /* UIKit.framework */; };
@@ -23,7 +24,6 @@
 		8A8745C2185FD6BD0074C919 /* SlowMotionVideoRecorderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A8745C1185FD6BD0074C919 /* SlowMotionVideoRecorderTests.m */; };
 		8A8745D1185FDBF20074C919 /* SVProgressHUD.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 8A8745CE185FDBF20074C919 /* SVProgressHUD.bundle */; };
 		8A8745D2185FDBF20074C919 /* SVProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 8A8745D0185FDBF20074C919 /* SVProgressHUD.m */; };
-		8AF1766018600C11000F656A /* TTMAVCaptureManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AF1765F18600C11000F656A /* TTMAVCaptureManager.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +37,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8A4448421CA0AEC700DEDAFA /* TTMCaptureManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TTMCaptureManager.h; sourceTree = "<group>"; };
+		8A4448431CA0AEC700DEDAFA /* TTMCaptureManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TTMCaptureManager.m; sourceTree = "<group>"; };
 		8A874593185FD6BD0074C919 /* SlowMotionVideoRecorder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SlowMotionVideoRecorder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8A874596185FD6BD0074C919 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		8A874598185FD6BD0074C919 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -60,8 +62,6 @@
 		8A8745CE185FDBF20074C919 /* SVProgressHUD.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SVProgressHUD.bundle; sourceTree = "<group>"; };
 		8A8745CF185FDBF20074C919 /* SVProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SVProgressHUD.h; sourceTree = "<group>"; };
 		8A8745D0185FDBF20074C919 /* SVProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SVProgressHUD.m; sourceTree = "<group>"; };
-		8AF1765E18600C11000F656A /* TTMAVCaptureManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TTMAVCaptureManager.h; sourceTree = "<group>"; };
-		8AF1765F18600C11000F656A /* TTMAVCaptureManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TTMAVCaptureManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,10 +88,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8A4448411CA0AEC700DEDAFA /* TTMCaptureManager */ = {
+			isa = PBXGroup;
+			children = (
+				8A4448421CA0AEC700DEDAFA /* TTMCaptureManager.h */,
+				8A4448431CA0AEC700DEDAFA /* TTMCaptureManager.m */,
+			);
+			path = TTMCaptureManager;
+			sourceTree = "<group>";
+		};
 		8A87458A185FD6BD0074C919 = {
 			isa = PBXGroup;
 			children = (
-				8AF1765D18600C11000F656A /* AVCaptureManager */,
+				8A4448411CA0AEC700DEDAFA /* TTMCaptureManager */,
 				8A8745CB185FDBF20074C919 /* vendor */,
 				8A87459C185FD6BD0074C919 /* SlowMotionVideoRecorder */,
 				8A8745BB185FD6BD0074C919 /* SlowMotionVideoRecorderTests */,
@@ -180,15 +189,6 @@
 				8A8745D0185FDBF20074C919 /* SVProgressHUD.m */,
 			);
 			path = SVProgressHUD;
-			sourceTree = "<group>";
-		};
-		8AF1765D18600C11000F656A /* AVCaptureManager */ = {
-			isa = PBXGroup;
-			children = (
-				8AF1765E18600C11000F656A /* TTMAVCaptureManager.h */,
-				8AF1765F18600C11000F656A /* TTMAVCaptureManager.m */,
-			);
-			path = AVCaptureManager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -289,11 +289,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8A4448441CA0AEC700DEDAFA /* TTMCaptureManager.m in Sources */,
 				8A8745AD185FD6BD0074C919 /* ViewController.m in Sources */,
 				8A8745D2185FDBF20074C919 /* SVProgressHUD.m in Sources */,
 				8A8745A7185FD6BD0074C919 /* AppDelegate.m in Sources */,
 				8A8745A3185FD6BD0074C919 /* main.m in Sources */,
-				8AF1766018600C11000F656A /* TTMAVCaptureManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

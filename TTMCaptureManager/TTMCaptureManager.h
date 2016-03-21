@@ -1,5 +1,5 @@
 //
-//  AVCaptureManager.h
+//  TTMCaptureManager.h
 //  SlowMotionVideoRecorder
 //  https://github.com/shu223/SlowMotionVideoRecorder
 //
@@ -8,26 +8,35 @@
 //
 
 #import <Foundation/Foundation.h>
+@import CoreMedia;
 
 
-typedef enum {
-    TTMOutputModeVideoData,
-    TTMOutputModeMovieFile,
-} TTMOutputMode;
+typedef NS_ENUM(NSUInteger, CameraType) {
+    CameraTypeBack,
+    CameraTypeFront,
+};
+
+typedef NS_ENUM(NSUInteger, OutputMode) {
+    OutputModeVideoData,
+    OutputModeMovieFile,
+};
 
 
-@protocol TTMAVCaptureManagerDelegate <NSObject>
+@protocol TTMCaptureManagerDelegate <NSObject>
 - (void)didFinishRecordingToOutputFileAtURL:(NSURL *)outputFileURL
                                       error:(NSError *)error;
 @end
 
 
-@interface TTMAVCaptureManager : NSObject
+@interface TTMCaptureManager : NSObject
 
-@property (nonatomic, assign) id<TTMAVCaptureManagerDelegate> delegate;
+@property (nonatomic, assign) id<TTMCaptureManagerDelegate> delegate;
 @property (nonatomic, readonly) BOOL isRecording;
+@property (nonatomic, copy) void (^onBuffer)(CMSampleBufferRef sampleBuffer);
 
-- (id)initWithPreviewView:(UIView *)previewView mode:(TTMOutputMode)mode;
+- (instancetype)initWithPreviewView:(UIView *)previewView
+                preferredCameraType:(CameraType)cameraType
+                         outputMode:(OutputMode)outputMode;
 - (void)toggleContentsGravity;
 - (void)resetFormat;
 - (void)switchFormatWithDesiredFPS:(CGFloat)desiredFPS;
