@@ -33,7 +33,7 @@
                                         <segments>
                                             <segment title="Default"/>
                                             <segment title="60fps"/>
-                                            <segment title="120fps"/>
+                                            <segment title="240fps"/>
                                         </segments>
                                         <color key="tintColor" red="1" green="0.80000000000000004" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <connections>

@@ -234,7 +234,7 @@
             desiredFps = 60.0;
             break;
         case 2:
-            desiredFps = 120.0;
+            desiredFps = 240.0;
             break;
     }
     
@@ -254,7 +254,7 @@
         
         dispatch_async(dispatch_get_main_queue(), ^{
 
-            if (desiredFps > 30.0) {
+            if (desiredFps >= 120.0) {
                 self.outerImageView.image = self.outerImage2;
             }
             else {
