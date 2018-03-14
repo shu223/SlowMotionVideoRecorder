@@ -1,7 +1,7 @@
 Slow Motion Video Recorder for iOS
 ==========================
 
-An iOS sample app for **recording higher fps slow-motion videos such as 60fps, 120fps, and 240fps** using AVFoundation. Including a wrapper class which makes the implementation much easier. Available on the **iPhone 5s, iPhone 6, iPhone 6 Plus, iPhone 6s, iPhone 6s Plus** etc. 
+An iOS sample app for **recording higher fps slow-motion videos such as 120, 240 fps** using AVFoundation. Including a wrapper class which makes the implementation much easier. Available on the **iPhone 5s, iPhone 6, iPhone 6 Plus, iPhone 6s, iPhone 6s Plus** etc. 
 
 ![](http://f.cl.ly/items/360a271y1G3Q2C2a3p2d/IMG_8907_r1_c1.jpg)
 
